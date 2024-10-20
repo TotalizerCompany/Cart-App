@@ -7,8 +7,9 @@ environment:
   sdk: '>=3.3.4 <4.0.0'
 
 dependencies:
-  barcode_scan2: ^4.3.3
   camera: ^0.11.0+2
+  cloud_firestore: ^5.4.0
+  firebase_core: ^3.4.0
   flutter:
     sdk: flutter
   google_ml_vision: ^0.0.8

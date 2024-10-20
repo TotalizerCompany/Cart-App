@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:google_ml_vision/google_ml_vision.dart';
@@ -14,7 +15,10 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
   bool isCameraInitialized = false;
   final BarcodeDetector barcodeDetector = GoogleVision.instance.barcodeDetector();
   Duration scanDelay = const Duration(seconds: 2);
-  List<String> scannedBarcodes = [];  // Lista para armazenar os códigos de barras escaneados
+
+
+   // Lista para armazenar os códigos de barras escaneados
+   List<Map<String, dynamic>> scannedProducts = [];
 
   @override
   void initState() {
@@ -54,11 +58,9 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
 
         if (barcodes.isNotEmpty) {
           for (Barcode barcode in barcodes) {
-            setState(() {
-              scannedBarcodes.add(barcode.displayValue ?? '');
-            });
-            print('Código de barras detectado: ${barcode.displayValue}');
-            print('lista com os codigos de barras: $scannedBarcodes');
+            if(barcode.displayValue != null && barcode.displayValue!.isNotEmpty){
+              await onBarcodeScanned(barcode.displayValue!);
+            }
           }
           await Future.delayed(scanDelay);
         }
@@ -87,6 +89,39 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
     );
   }
 
+  //Conexãocom o fireStore
+  Future<void> onBarcodeScanned(String barcode) async{
+    //Tenta buscar o produto com o codigo de barras no banco no firebase
+    final productDoc = await FirebaseFirestore.instance.collection('produtos').doc(barcode).get();
+
+    if(productDoc.exists){
+      //Verifica se o produto ja existe na lista
+      final  existingProductIndex = scannedProducts.indexWhere((product) => product['id'] == barcode);
+
+      if(existingProductIndex != -1){
+        //Se o produto existir na lista, incrementa a quantidade
+        setState(() {
+          scannedProducts[existingProductIndex]['quantidade'] += 1;
+        });
+        //print no terminal para fim de testes
+        print('quantidade atulizada ${scannedProducts[existingProductIndex]['nome']}: ${scannedProducts[existingProductIndex]['quantidade']}');
+      }else{
+        //produto que não esta na lista
+        setState(() {
+          scannedProducts.add({
+            'id' : barcode,
+            'nome' : productDoc['nome'],
+            'preco' : productDoc['preco'],
+            'quantidade' : 1,
+          });
+        });
+        print('produto adicionado: ${productDoc['nome']}');
+      }
+    }else{
+      print('produto não encontrado');
+    } 
+  }
+
   @override
   void dispose() {
     // Libera os recursos da câmera
@@ -98,23 +133,23 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Scanner de Códigos de Barras'),
-      ),
       body: Column(
         children: [
           Expanded(
             child: ListView.builder(
-              itemCount: scannedBarcodes.length,
+              itemCount: scannedProducts.length,
               itemBuilder: (context, index) {
+                final product = scannedProducts[index];  // Objeto do produto na lista
                 return ListTile(
-                  title: Text(scannedBarcodes[index]),
+                  title: Text(product['nome']),
+                  subtitle: Text('Preço: R\$${product['preco']}'),
+                  trailing: Text('Quantidade: ${product['quantidade']}'),
                 );
               },
             )
           ),
-          TextButton(onPressed: null, 
-            child: const Text('Finalizar compra')
+          const ElevatedButton(onPressed: null, 
+            child: Text('Finalizar compra')
           )
         ],
       )
