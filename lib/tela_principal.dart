@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:google_ml_vision/google_ml_vision.dart';
+import 'package:totalizer_cart/tela_qr_code.dart';
 
 class TelaPrincipal extends StatefulWidget {
   @override
@@ -116,6 +117,7 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
           });
         });
         print('produto adicionado: ${productDoc['nome']}');
+        print('lista atualizada: $scannedProducts');
       }
     }else{
       print('produto não encontrado');
@@ -133,26 +135,70 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.orange[400],
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+      ),
       body: Column(
         children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: scannedProducts.length,
-              itemBuilder: (context, index) {
-                final product = scannedProducts[index];  // Objeto do produto na lista
-                return ListTile(
-                  title: Text(product['nome']),
-                  subtitle: Text('Preço: R\$${product['preco']}'),
-                  trailing: Text('Quantidade: ${product['quantidade']}'),
+             Expanded(
+              child: Container(
+                width: 550,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(20),
+                    bottomRight: Radius.circular(20),
+                  )
+                ),
+                child: ListView.builder(
+                  itemCount: scannedProducts.length,
+                  itemBuilder: (context, index) {
+                    final product = scannedProducts[index];  // Objeto do produto na lista
+                    return ListTile(
+                      title: Text(product['nome']),
+                      subtitle: Text('Preço: R\$${product['preco']}'),
+                      trailing: Text('Quantidade: ${product['quantidade']}'),
+                    );
+                  },
+                ),
+              )
+            ),
+          ElevatedButton(
+            onPressed:() {
+              if(scannedProducts.isEmpty){
+                _showAlertDialog(context);
+              }else{
+                Navigator.push(
+                  context, MaterialPageRoute(
+                    builder: (context) => TelaQrCode(minhalista: scannedProducts)
+                  )
                 );
-              },
-            )
-          ),
-          const ElevatedButton(onPressed: null, 
+              }
+            }, 
             child: Text('Finalizar compra')
           )
         ],
       )
+    );
+  }
+
+  void _showAlertDialog(BuildContext context){
+    showDialog(context: context,
+     builder: (BuildContext context) {
+       return AlertDialog(
+        title: const Text('Carrinho vazio'),
+        content: const Text('Por favor, adicione algum item ao carrinho'),
+        actions: [
+          TextButton(
+            child: const Text('Ok'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+       );
+     }
     );
   }
 }

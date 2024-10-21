@@ -7,7 +7,8 @@ import 'firebase_options.dart';
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Orientação da tela
+  // Orientação da tela e outras configurçoes visuais do aplicativo
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeRight,
     DeviceOrientation.landscapeLeft,
@@ -20,7 +21,6 @@ void main() async{
 
     // Inicialização da aplicação
     runApp(const MainApp());
-
 }
 
 class MainApp extends StatelessWidget {
