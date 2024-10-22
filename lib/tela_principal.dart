@@ -132,6 +132,14 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
     super.dispose();
   }
 
+  double calcularTotal(){
+    double total = 0;
+    for (var produto in scannedProducts) {
+      total += (produto['preco'] * produto['quantidade'] ?? 0.0);
+    }
+    return total;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -141,45 +149,58 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
       ),
       body: Column(
         children: [
-             Expanded(
-              child: Container(
-                width: 550,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(20),
-                    bottomRight: Radius.circular(20),
-                  )
+          Expanded(
+            child: Container(
+              width: 550,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
                 ),
-                child: ListView.builder(
-                  itemCount: scannedProducts.length,
-                  itemBuilder: (context, index) {
-                    final product = scannedProducts[index];  // Objeto do produto na lista
-                    return ListTile(
-                      title: Text(product['nome']),
-                      subtitle: Text('Preço: R\$${product['preco']}'),
-                      trailing: Text('Quantidade: ${product['quantidade']}'),
-                    );
-                  },
-                ),
-              )
+              ),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: scannedProducts.length,
+                      itemBuilder: (context, index) {
+                        final product = scannedProducts[index];  // Objeto do produto na lista
+                        return ListTile(
+                          title: Text(product['nome']),
+                          subtitle: Text('Preço: R\$${product['preco']}'),
+                          trailing: Text('Quantidade: ${product['quantidade']}'),
+                        );
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      'Total: R\$${calcularTotal().toStringAsFixed(2)}',
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
             ),
+          ),
           ElevatedButton(
-            onPressed:() {
-              if(scannedProducts.isEmpty){
+            onPressed: () {
+              if (scannedProducts.isEmpty) {
                 _showAlertDialog(context);
-              }else{
+              } else {
                 Navigator.push(
                   context, MaterialPageRoute(
                     builder: (context) => TelaQrCode(minhalista: scannedProducts)
-                  )
+                  ),
                 );
               }
-            }, 
-            child: Text('Finalizar compra')
-          )
+            },
+            child: Text('Confirmar Produtos'),
+          ),
         ],
-      )
+      ),
     );
   }
 
