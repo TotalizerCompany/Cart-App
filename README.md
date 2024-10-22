@@ -1,3 +1,4 @@
-# totalizer_cart
-
-A new Flutter project.
+# TOTALIZER CART
+```bash
+git clone https://github.com/TotalizerCompany/Cart-App -b main
+```
