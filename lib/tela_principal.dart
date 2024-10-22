@@ -5,8 +5,10 @@ import 'package:google_ml_vision/google_ml_vision.dart';
 import 'package:totalizer_cart/tela_qr_code.dart';
 
 class TelaPrincipal extends StatefulWidget {
+  const TelaPrincipal({super.key});
+
   @override
-  _TelaPrincipalState createState() => _TelaPrincipalState();
+  createState() => _TelaPrincipalState();
 }
 
 class _TelaPrincipalState extends State<TelaPrincipal> {
@@ -143,8 +145,13 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.orange[400],
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: AppBar(
+        title: const Text('TOTALIZER'), 
+        titleTextStyle: const TextStyle(
+        fontSize: 30,
+        fontWeight: FontWeight.w900,
+        color: Colors.black),
         backgroundColor: Colors.transparent,
       ),
       body: Column(
@@ -153,7 +160,7 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
             child: Container(
               width: 550,
               decoration: const BoxDecoration(
-                color: Colors.white,
+                color: Color.fromARGB(255, 206, 206, 206),
                 borderRadius: BorderRadius.only(
                   topRight: Radius.circular(20),
                   bottomRight: Radius.circular(20),
@@ -177,16 +184,17 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text(
-                      'Total: R\$${calcularTotal().toStringAsFixed(2)}',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      'TOTAL: R\$${calcularTotal().toStringAsFixed(2)}',
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          ElevatedButton(
-            onPressed: () {
+          const SizedBox(height: 5),
+          GestureDetector(
+            onTap:() {
               if (scannedProducts.isEmpty) {
                 _showAlertDialog(context);
               } else {
@@ -197,8 +205,22 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
                 );
               }
             },
-            child: Text('Confirmar Produtos'),
-          ),
+                  child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.all(15),
+                        child: const Text(
+                          'Confirmar pedido',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 10,
+                          ),
+                        ),
+                      )),
+                      const SizedBox(height: 5),
         ],
       ),
     );

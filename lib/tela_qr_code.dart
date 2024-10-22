@@ -5,7 +5,7 @@ import 'package:archive/archive.dart';
 class TelaQrCode extends StatelessWidget{
   final List<dynamic> minhalista;
 
-  TelaQrCode({required this.minhalista});
+  const TelaQrCode({super.key, required this.minhalista});
   //Função para compactar a lista em gZip
   Future <String> compactarLista(List<dynamic> lista) async{
     //converte a lista em string (formato JSON)
