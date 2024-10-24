@@ -145,14 +145,13 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: AppBar(
-        title: const Text('TOTALIZER'), 
+        title: const Text('TOTALIZER'),
+        centerTitle: false,
         titleTextStyle: const TextStyle(
         fontSize: 30,
         fontWeight: FontWeight.w900,
         color: Colors.black),
-        backgroundColor: Colors.transparent,
       ),
       body: Column(
         children: [
@@ -160,7 +159,7 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
             child: Container(
               width: 550,
               decoration: const BoxDecoration(
-                color: Color.fromARGB(255, 206, 206, 206),
+                color: Colors.white,
                 borderRadius: BorderRadius.only(
                   topRight: Radius.circular(20),
                   bottomRight: Radius.circular(20),
@@ -185,14 +184,14 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
                     padding: const EdgeInsets.all(16.0),
                     child: Text(
                       'TOTAL: R\$${calcularTotal().toStringAsFixed(2)}',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 5),
+          const SizedBox(height: 15),
           GestureDetector(
             onTap:() {
               if (scannedProducts.isEmpty) {
@@ -207,12 +206,12 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
             },
                   child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.black,
+                        color: const Color.fromARGB(255, 0, 0, 0),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       padding: const EdgeInsets.all(15),
                         child: const Text(
-                          'Confirmar pedido',
+                          'Confirmar produtos',
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w900,
