@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:totalizer_cart/tela_principal.dart';
+import 'package:totalizer_cart/views/boas_vindas.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+import 'services/firebase_options.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +30,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return  const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: TelaPrincipal(),
+      home: TelaBoasVindas(),
     );
   }
 }

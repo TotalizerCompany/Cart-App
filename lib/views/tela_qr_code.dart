@@ -13,7 +13,7 @@ class TelaQrCode extends StatelessWidget{
     //converte a string em bytes (formato UTF-8)
     List<int> dadosBytes = utf8.encode(dadosString);
     //compacta os os bytes com o GZip
-    List<int> comprimido = GZipEncoder().encode(dadosBytes)!;
+    List<int> comprimido = GZipEncoder().encode(dadosBytes);
 
     return base64Encode(comprimido);
   }

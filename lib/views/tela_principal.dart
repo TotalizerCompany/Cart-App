@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:google_ml_vision/google_ml_vision.dart';
-import 'package:totalizer_cart/tela_qr_code.dart';
+import 'package:totalizer_cart/views/tela_qr_code.dart';
 
 class TelaPrincipal extends StatefulWidget {
   const TelaPrincipal({super.key});
@@ -172,10 +172,71 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
                       itemCount: scannedProducts.length,
                       itemBuilder: (context, index) {
                         final product = scannedProducts[index];  // Objeto do produto na lista
-                        return ListTile(
-                          title: Text(product['nome']),
-                          subtitle: Text('Preço: R\$${product['preco']}'),
-                          trailing: Text('Quantidade: ${product['quantidade']}'),
+                        return Padding(
+                          padding:  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  flex: 3,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        product['nome'],
+                                        style: const TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                      Text(
+                                        'R\$ ${product['preco'].toStringAsFixed(2)}',
+                                        style: const TextStyle(color:   Colors.black54),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.remove),
+                                      onPressed: () {
+                                        setState(() {
+                                          if (product['quantidade'] > 1) {
+                                            product['quantidade'] -= 1;
+                                          }else{
+                                            scannedProducts.removeAt(index);
+                                          }
+                                        });
+                                      },
+                                    ),
+                                    Text('${product['quantidade']}',
+                                      style: const TextStyle(fontWeight: FontWeight.bold)
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.add),
+                                      onPressed: () {
+                                        setState(() {
+                                          product['quantidade'] += 1;
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                                  onPressed: () {
+                                    setState(() {
+                                      scannedProducts.removeAt(index);
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
                         );
                       },
                     ),

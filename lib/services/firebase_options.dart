@@ -86,3 +86,76 @@ class DefaultFirebaseOptions {
     measurementId: 'G-SFG44T6XSN',
   );
 }
+
+class SecondaryFirebaseOptions {
+  static FirebaseOptions get currentPlatform {
+    if (kIsWeb) {
+      return web;
+    }
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return android;
+      case TargetPlatform.iOS:
+        return ios;
+      case TargetPlatform.macOS:
+        return macos;
+      case TargetPlatform.windows:
+        return windows;
+      case TargetPlatform.linux:
+        throw UnsupportedError(
+          'SecondaryFirebaseOptions have not been configured for linux - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
+      default:
+        throw UnsupportedError(
+          'SecudaryFirebaseOptions are not supported for this platform.',
+        );
+    }
+  }
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyC6XyCiTFRIk0E7uO1hMtxNyIly-opzzT8',
+    appId: '1:1029762239051:web:f6554709b14dc4b7979bce',
+    messagingSenderId: '1029762239051',
+    projectId: 'totalizer-app',
+    authDomain: 'totalizer-app.firebaseapp.com',
+    storageBucket: 'totalizer-app.firebasestorage.app',
+    measurementId: 'G-JPVE7M4P09',
+  );
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyDxlXMHs35pZuCoTU3kbF8ZQW1DTejIbwE',
+    appId: '1:1029762239051:android:bd74bef718d69439979bce',
+    messagingSenderId: '1029762239051',
+    projectId: 'totalizer-app',
+    storageBucket: 'totalizer-app.firebasestorage.app',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyBKroWCnqP5T2HrkxwdQ6V-zlQ3rOGSswc',
+    appId: '1:1029762239051:ios:07cf59064f9d144d979bce',
+    messagingSenderId: '1029762239051',
+    projectId: 'totalizer-app',
+    storageBucket: 'totalizer-app.firebasestorage.app',
+    iosBundleId: 'com.example.totalizerCell',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyBKroWCnqP5T2HrkxwdQ6V-zlQ3rOGSswc',
+    appId: '1:1029762239051:ios:07cf59064f9d144d979bce',
+    messagingSenderId: '1029762239051',
+    projectId: 'totalizer-app',
+    storageBucket: 'totalizer-app.firebasestorage.app',
+    iosBundleId: 'com.example.totalizerCell',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyC6XyCiTFRIk0E7uO1hMtxNyIly-opzzT8',
+    appId: '1:1029762239051:web:b3133d055884b853979bce',
+    messagingSenderId: '1029762239051',
+    projectId: 'totalizer-app',
+    authDomain: 'totalizer-app.firebaseapp.com',
+    storageBucket: 'totalizer-app.firebasestorage.app',
+    measurementId: 'G-GN21HQ17CV',
+  );
+}
