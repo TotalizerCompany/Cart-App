@@ -11,7 +11,7 @@ class TelaQrCode extends StatefulWidget {
   const TelaQrCode({super.key, required this.minhalista});
 
   @override
-  _TelaQrCodeState createState() => _TelaQrCodeState();
+  createState() => _TelaQrCodeState();
 }
 
 class _TelaQrCodeState extends State<TelaQrCode> {
@@ -46,7 +46,13 @@ class _TelaQrCodeState extends State<TelaQrCode> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Gerar QR Code"),
+        title: const Text('TOTALIZER'),
+        centerTitle: false,
+        titleTextStyle: const TextStyle(
+          fontSize: 30,
+          fontWeight: FontWeight.w900,
+          color: Colors.black,
+        ),
         leading: null,
         automaticallyImplyLeading: false,
       ),
@@ -65,7 +71,7 @@ class _TelaQrCodeState extends State<TelaQrCode> {
                   return QrImageView(
                     data: conteudoCompactado,
                     version: QrVersions.auto,
-                    size: 180.0,
+                    size: 170.0,
                   );
                 }
               },
@@ -74,8 +80,15 @@ class _TelaQrCodeState extends State<TelaQrCode> {
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(20.0),
               child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                   shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                minimumSize: const Size(150, 50),
+                backgroundColor: const Color.fromARGB(255, 0, 0, 0),
+                ),
                 onPressed: () {
                   Navigator.pushReplacement(
                     context,
@@ -84,7 +97,11 @@ class _TelaQrCodeState extends State<TelaQrCode> {
                             TelaBoasVindas()), // Substitua TelaInicial pela sua tela inicial
                   );
                 },
-                child: const Text('Voltar para a Tela Inicial'),
+                child: const Text('Voltar para a Tela Inicial',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      color: Color.fromARGB(255, 255, 255, 255),
+                    )),
               ),
             ),
           ),

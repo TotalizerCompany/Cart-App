@@ -18,6 +18,12 @@ class ListaDetalhadaScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Detalhes da Lista: $listaId'),
+        centerTitle: false,
+        titleTextStyle: const TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w900,
+          color: Colors.black,
+        ),
       ),
       body: itensList.isEmpty
           ? Center(child: Text('Nenhum item nesta lista'))
@@ -35,6 +41,7 @@ class ListaDetalhadaScreen extends StatelessWidget {
               },
             ),
       floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: Colors.black,
         onPressed: () {
           // Chama a TelaPrincipal e passa a lista de itens
           Navigator.push(
@@ -46,7 +53,10 @@ class ListaDetalhadaScreen extends StatelessWidget {
             ),
           );
         },
-        label: Text('Importar'),
+        label: Text('Importar',
+            style: TextStyle(
+              color: Colors.white,
+            )),
         tooltip: 'Importar',
       ),
     );

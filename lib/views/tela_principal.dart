@@ -5,10 +5,10 @@ import 'package:totalizer_cart/components/bar_code.dart';
 class TelaPrincipal extends StatefulWidget {
   final List<Map<String, dynamic>>? listaImportada;
 
-  const TelaPrincipal({Key? key, this.listaImportada}) : super(key: key);
+  const TelaPrincipal({super.key, this.listaImportada});
 
   @override
-  _TelaPrincipalState createState() => _TelaPrincipalState();
+  createState() => _TelaPrincipalState();
 }
 
 class _TelaPrincipalState extends State<TelaPrincipal> {
@@ -114,11 +114,20 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
     // Exibe os produtos escaneados (sem lista importada)
     return Center(
       child: Container(
-        width: 900,
-        height: 500,
-        padding: const EdgeInsets.all(16.0),
+        width: 700,
+        height: 300,
+        padding: const EdgeInsets.all(20.0),
         decoration: BoxDecoration(
-          color: Colors.amber
+          color: const Color.fromARGB(255, 255, 255, 255)
+          , borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 5,
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+          ]
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -218,11 +227,20 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
   // Exibe a lista importada
   return Center(
     child: Container(
-      width: 900,
-      height: 500,
-      padding: const EdgeInsets.all(16.0),
+      width: 700,
+      height: 300,
+      padding: const EdgeInsets.all(20.0),
       decoration: BoxDecoration(
-        color: Colors.amber,
+        color: const Color.fromARGB(255, 255, 255, 255),
+         borderRadius: BorderRadius.circular(10),
+         boxShadow: [
+           BoxShadow(
+             color: Colors.grey.withOpacity(0.1),
+             spreadRadius: 5,
+             blurRadius: 10,
+             offset: const Offset(0, 3),
+           ),
+         ]
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -248,7 +266,7 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
                             color: Colors.grey[200],
                             borderRadius: BorderRadius.circular(10),
                             border: isChecked
-                                ? Border.all(color: Colors.green, width: 2)
+                                ? Border.all(color: const Color.fromARGB(255, 0, 0, 0), width: 2)
                                 : null,
                           ),
                           child: Row(
@@ -257,6 +275,8 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
                               Row(
                                 children: [
                                   Checkbox(
+                                    checkColor: const Color.fromARGB(255, 0, 0, 0),
+                                    activeColor: const Color.fromARGB(255, 255, 255, 255),
                                     value: isChecked,
                                     onChanged: (value) {
                                       setState(() {

@@ -9,7 +9,7 @@ class ImportScreen extends StatefulWidget {
   const ImportScreen({super.key});
 
   @override
-  _ImportScreenState createState() => _ImportScreenState();
+  createState() => _ImportScreenState();
 }
 
 class _ImportScreenState extends State<ImportScreen> {
@@ -36,6 +36,16 @@ class _ImportScreenState extends State<ImportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+       appBar: AppBar(
+        title: const Text('TOTALIZER'),
+        centerTitle: false,
+        titleTextStyle: const TextStyle(
+          fontSize: 30,
+          fontWeight: FontWeight.w900,
+          color: Colors.black,
+        ),
+        
+      ),
       body: Center(
         child: sessionId == null
             ? CircularProgressIndicator()

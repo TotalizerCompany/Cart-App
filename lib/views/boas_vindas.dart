@@ -8,19 +8,30 @@ class TelaBoasVindas extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: null,
-        automaticallyImplyLeading: false,
-      ),
+     
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Bem-vindo ao TOTALIZER!',
+            // Adicionando a imagem aqui
+            CircleAvatar(
+              radius: 80, // Tamanho da imagem
+              backgroundImage: AssetImage('assets/icon/icon1.png'), // Caminho para a imagem
+              backgroundColor: Colors.transparent,
+            ),
+           const Text(
+                        'TOTALIZER',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+            Text(
+              'Seja bem vindo!',
               style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: Colors.grey[700],
+                fontWeight: FontWeight.normal,
               ),
               textAlign: TextAlign.center,
             ),
@@ -29,18 +40,34 @@ class TelaBoasVindas extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 0, 0, 0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                   onPressed: () {
-                    // inicia sem importa uma lista
+                    // inicia sem importar uma lista
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                           builder: (context) => const TelaPrincipal()),
                     );
                   },
-                  child: const Text('Iniciar sem lista'),
+                  child: const Text(
+                    'Iniciar sem lista',
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
                 ),
                 const SizedBox(width: 20),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 0, 0, 0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                   onPressed: () {
                     // importa uma lista do app de celular
                     Navigator.push(
@@ -49,7 +76,11 @@ class TelaBoasVindas extends StatelessWidget {
                           builder: (context) => const ImportScreen()),
                     );
                   },
-                  child: const Text('Importar lista'),
+                  child: const Text(
+                    'Importar lista',
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ],
             ),

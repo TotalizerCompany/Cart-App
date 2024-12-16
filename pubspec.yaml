@@ -33,3 +33,6 @@ icons_launcher:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/icon/icon1.png
