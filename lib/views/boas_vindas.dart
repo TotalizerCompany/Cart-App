@@ -8,6 +8,10 @@ class TelaBoasVindas extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: null,
+        automaticallyImplyLeading: false,
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -27,9 +31,10 @@ class TelaBoasVindas extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () {
                     // inicia sem importa uma lista
-                    Navigator.push(
-                      context, 
-                      MaterialPageRoute(builder: (context) => const TelaPrincipal()),
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const TelaPrincipal()),
                     );
                   },
                   child: const Text('Iniciar sem lista'),
@@ -39,8 +44,9 @@ class TelaBoasVindas extends StatelessWidget {
                   onPressed: () {
                     // importa uma lista do app de celular
                     Navigator.push(
-                      context, 
-                      MaterialPageRoute(builder: (context) => const ImportScreen()),
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ImportScreen()),
                     );
                   },
                   child: const Text('Importar lista'),

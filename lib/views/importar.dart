@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:totalizer_cart/views/lista_detalhada.dart';
 import '../services/secondary_firebase.dart';
 import 'package:uuid/uuid.dart';
 
@@ -21,13 +22,11 @@ class _ImportScreenState extends State<ImportScreen> {
     _generateSessionId();
   }
 
-  // Função para gerar o sessionId único
   void _generateSessionId() {
     var uuid = Uuid();
     sessionId = uuid.v4();
 
     if (sessionId != null) {
-      // Chama a função do SecondaryFirebaseService para salvar o sessionId
       SecondaryFirebaseService.saveSessionToFirestore(sessionId!);
     }
 
@@ -39,11 +38,12 @@ class _ImportScreenState extends State<ImportScreen> {
     return Scaffold(
       body: Center(
         child: sessionId == null
-            ? CircularProgressIndicator() // Exibe um carregamento enquanto é gerado o sessionId
+            ? CircularProgressIndicator()
             : FutureBuilder<FirebaseFirestore>(
                 future: SecondaryFirebaseService.getSecondaryFirestore(),
                 builder: (context, firestoreSnapshot) {
-                  if (firestoreSnapshot.connectionState == ConnectionState.waiting) {
+                  if (firestoreSnapshot.connectionState ==
+                      ConnectionState.waiting) {
                     return CircularProgressIndicator();
                   }
 
@@ -56,7 +56,8 @@ class _ImportScreenState extends State<ImportScreen> {
                           .doc(sessionId)
                           .snapshots(),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return CircularProgressIndicator();
                         }
 
@@ -66,9 +67,13 @@ class _ImportScreenState extends State<ImportScreen> {
 
                           if (data != null) {
                             bool authenticated = data['authenticated'] ?? false;
-                            userId = data.containsKey('userId') ? data['userId'] : null;
+                            userId = data.containsKey('userId')
+                                ? data['userId']
+                                : null;
 
-                            if (authenticated && userId != null && userId!.isNotEmpty) {
+                            if (authenticated &&
+                                userId != null &&
+                                userId!.isNotEmpty) {
                               return StreamBuilder<QuerySnapshot>(
                                 stream: secondaryFirestore
                                     .collection(userId!)
@@ -76,11 +81,13 @@ class _ImportScreenState extends State<ImportScreen> {
                                     .collection('lista_de_compras')
                                     .snapshots(),
                                 builder: (context, listSnapshot) {
-                                  if (listSnapshot.connectionState == ConnectionState.waiting) {
+                                  if (listSnapshot.connectionState ==
+                                      ConnectionState.waiting) {
                                     return CircularProgressIndicator();
                                   }
 
-                                  if (listSnapshot.hasData && listSnapshot.data != null) {
+                                  if (listSnapshot.hasData &&
+                                      listSnapshot.data != null) {
                                     var items = listSnapshot.data!.docs;
 
                                     if (items.isEmpty) {
@@ -91,35 +98,33 @@ class _ImportScreenState extends State<ImportScreen> {
                                       itemCount: items.length,
                                       itemBuilder: (context, index) {
                                         var item = items[index];
-                                        var itemData = item.data() as Map<String, dynamic>;
+                                        var itemData =
+                                            item.data() as Map<String, dynamic>;
 
-                                        // Verifica se o campo 'itens' é uma lista
-                                        if (itemData['itens'] is List) {
-                                          var itensList = itemData['itens'] as List<dynamic>;
+                                        String displayTitle = itemData['titulo']
+                                                    ?.isNotEmpty ??
+                                                false
+                                            ? itemData[
+                                                'titulo'] // Se o título não estiver vazio, exibe o título
+                                            : item.id;
 
-                                          // Cria uma lista interna para exibir os itens
-                                          return ListView.builder(
-                                            shrinkWrap: true, // Impede o erro de layout no ListView
-                                            physics: NeverScrollableScrollPhysics(),
-                                            itemCount: itensList.length,
-                                            itemBuilder: (context, index) {
-                                              var currentItem = itensList[index];
-
-                                              var itemNome = currentItem['nome'] ?? 'Sem nome';
-                                              var itemQuantidade = currentItem['quantidade'] ?? 'Indefinido';
-
-                                              return ListTile(
-                                                title: Text(itemNome),
-                                                subtitle: Text('Quantidade: $itemQuantidade'),
-                                              );
-                                            },
-                                          );
-                                        } else {
-                                          return ListTile(
-                                            title: Text('Itens não encontrados'),
-                                            subtitle: Text(item.id),
-                                          );
-                                        }
+                                        return ListTile(
+                                          title: Text(displayTitle),
+                                          subtitle: Text(
+                                              'Itens: ${itemData['itens']?.length ?? 0}'),
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    ListaDetalhadaScreen(
+                                                  listaId: displayTitle,
+                                                  listaData: itemData,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        );
                                       },
                                     );
                                   } else {
@@ -138,13 +143,15 @@ class _ImportScreenState extends State<ImportScreen> {
                                     gapless: false,
                                   ),
                                   SizedBox(height: 20),
-                                  Text('Aguardando autenticação...', textAlign: TextAlign.center),
+                                  Text('Aguardando autenticação...',
+                                      textAlign: TextAlign.center),
                                 ],
                               );
                             }
                           } else {
                             return Center(
-                              child: Text('Erro ao carregar o documento do Firestore'),
+                              child: Text(
+                                  'Erro ao carregar o documento do Firestore'),
                             );
                           }
                         } else {
@@ -156,7 +163,8 @@ class _ImportScreenState extends State<ImportScreen> {
                     );
                   } else {
                     return Center(
-                      child: Text('Erro ao acessar o Firestore do segundo banco'),
+                      child:
+                          Text('Erro ao acessar o Firestore do segundo banco'),
                     );
                   }
                 },
