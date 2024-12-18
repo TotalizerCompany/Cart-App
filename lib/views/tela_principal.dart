@@ -3,7 +3,7 @@ import 'package:totalizer_cart/views/tela_qr_code.dart';
 import 'package:totalizer_cart/components/bar_code.dart';
 
 class TelaPrincipal extends StatefulWidget {
-  final List<Map<String, dynamic>>? listaImportada;
+  final Map<String, dynamic>? listaImportada;
 
   const TelaPrincipal({super.key, this.listaImportada});
 
@@ -15,21 +15,30 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
   final CameraSetup _cameraSetup = CameraSetup();
   final FirebaseService _firebaseService = FirebaseService();
 
-  List<Map<String, dynamic>> scannedProducts = [];
-  List<Map<String, dynamic>> importedList = [];
-  Duration scanDelay = const Duration(seconds: 2);
+  Map<String, dynamic> scannedProducts = {};
+  Map<String, dynamic> importedList = {};
+  Duration scanDelay = const Duration(seconds: 0);
 
   @override
   void initState() {
     super.initState();
 
     // Verifica se a lista foi importada
-    if (widget.listaImportada != null) {
+    if (widget.listaImportada != null && widget.listaImportada!.isNotEmpty) {
       importedList = widget.listaImportada!;
+      print('Import List recebida: $importedList');
+    } else {
+      print('Nenhuma lista importada ou a lista está vazia.');
     }
 
     // Inicializa a câmera
-    _cameraSetup.initializeCamera(onBarcodeScanned, scanDelay).then((_) {
+    _cameraSetup
+        .initializeCamera(
+      onBarcodeScanned:
+          onBarcodeScanned, // Função de callback ao escanear código
+      scanDelay: Duration(seconds: 2), // Defina o atraso entre escaneamentos
+    )
+        .then((_) {
       setState(() {});
     });
   }
@@ -37,37 +46,70 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
   Future<void> onBarcodeScanned(String barcode) async {
     // Caso a lista seja importada, atualiza o progresso de escaneamento
     if (importedList.isNotEmpty) {
-      final productData = importedList.firstWhere(
-        (product) => product['id'] == barcode,
-        orElse: () => {},
-      );
+      print(barcode);
+      final productData = await _firebaseService.fetchProductByBarcode(barcode);
 
-      if (productData.isNotEmpty) {
-        setState(() {
-          final index = importedList.indexOf(productData);
-          final currentQuantity =
-              importedList[index]['quantidadeEscaneada'] ?? 0;
-          final totalQuantity = importedList[index]['quantidade'] ?? 0;
+      if (productData != null) {
+        // Nome do produto obtido do Firebase
+        final productNameFromFirebase =
+            productData['nome'].toString().toLowerCase().trim();
+        final productPriceFromFirebase =
+            productData['preco'] ?? 0.0; // Preço do produto
 
-          // Só aumenta a quantidade escaneada se não atingir o total
-          if (currentQuantity < totalQuantity) {
-            importedList[index]['quantidadeEscaneada'] = currentQuantity + 1;
-          }
-        });
+        // Verifica se existe um produto na lista importada com o mesmo nome
+        final matchingProduct = importedList.values.firstWhere(
+          (product) {
+            final productName = product['nome'].toString().toLowerCase().trim();
+
+            // Verifica se qualquer palavra do nome do produto do Firebase está contida no nome da lista importada
+            return productName
+                .split(' ')
+                .any((word) => productNameFromFirebase.contains(word));
+          },
+          orElse: () => null,
+        );
+
+        if (matchingProduct != null) {
+          // Se encontrou o produto correspondente na lista importada
+          setState(() {
+            // Atualiza o preço do produto na lista importada
+            matchingProduct['preco'] = productPriceFromFirebase;
+
+            final currentQuantity = matchingProduct['quantidadeEscaneada'] ?? 0;
+            final totalQuantity = matchingProduct['quantidade'] ?? 0;
+
+            // Só aumenta a quantidade escaneada se não atingir o total
+            if (currentQuantity < totalQuantity) {
+              matchingProduct['quantidadeEscaneada'] = currentQuantity + 1;
+            }
+          });
+          print(
+              "Produto encontrado na lista importada: ${matchingProduct['nome']}");
+        } else {
+          // Se não encontrou na lista importada, adiciona ao carrinho (ou outro tratamento)
+          setState(() {
+            if (scannedProducts.containsKey(barcode)) {
+              scannedProducts[barcode]['quantidade'] += 1;
+            } else {
+              scannedProducts[barcode] = productData;
+            }
+          });
+          print(
+              'Produto não encontrado na lista importada, adicionando ao carrinho: ${productData['nome']}');
+        }
+      } else {
+        print('Produto não encontrado com a palavra-chave "$barcode".');
       }
     } else {
       // Caso não tenha lista, adiciona produtos ao carrinho normalmente
       final productData = await _firebaseService.fetchProductByBarcode(barcode);
 
       if (productData != null) {
-        final existingProductIndex =
-            scannedProducts.indexWhere((product) => product['id'] == barcode);
-
         setState(() {
-          if (existingProductIndex != -1) {
-            scannedProducts[existingProductIndex]['quantidade'] += 1;
+          if (scannedProducts.containsKey(barcode)) {
+            scannedProducts[barcode]['quantidade'] += 1;
           } else {
-            scannedProducts.add(productData);
+            scannedProducts[barcode] = (productData);
           }
         });
       } else {
@@ -77,7 +119,7 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
   }
 
   double calcularTotal() {
-    return scannedProducts.fold(0.0, (total, produto) {
+    return scannedProducts.values.fold(0.0, (total, produto) {
       return total + (produto['preco'] * produto['quantidade']);
     });
   }
@@ -90,6 +132,7 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
 
   @override
   Widget build(BuildContext context) {
+    print('Import List: $importedList');
     return Scaffold(
       appBar: AppBar(
         title: const Text('TOTALIZER'),
@@ -118,17 +161,16 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
         height: 300,
         padding: const EdgeInsets.all(20.0),
         decoration: BoxDecoration(
-          color: const Color.fromARGB(255, 255, 255, 255)
-          , borderRadius: BorderRadius.circular(10),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              spreadRadius: 5,
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ]
-        ),
+            color: const Color.fromARGB(255, 255, 255, 255),
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                spreadRadius: 5,
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ]),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -136,7 +178,7 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
               child: ListView.builder(
                 itemCount: scannedProducts.length,
                 itemBuilder: (context, index) {
-                  final product = scannedProducts[index];
+                  final product = scannedProducts.values.elementAt(index);
                   return Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 8.0, vertical: 4.0),
@@ -168,6 +210,12 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
                           ),
                           Row(
                             children: [
+                              // Preço do produto
+                              Text(
+                                'R\$ ${product['preco'].toStringAsFixed(2)}',
+                                style: const TextStyle(color: Colors.black54),
+                              ),
+                              // Botão para diminuir a quantidade escaneada
                               IconButton(
                                 icon: const Icon(Icons.remove),
                                 onPressed: () {
@@ -175,14 +223,17 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
                                     if (product['quantidade'] > 1) {
                                       product['quantidade'] -= 1;
                                     } else {
-                                      scannedProducts.removeAt(index);
+                                      scannedProducts.remove(product['id']);
                                     }
                                   });
                                 },
                               ),
+                              // Texto com a quantidade escaneada e total
                               Text('${product['quantidade']}',
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold)),
+
+                              // Botão para aumentar a quantidade escaneada
                               IconButton(
                                 icon: const Icon(Icons.add),
                                 onPressed: () {
@@ -193,12 +244,13 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
                               ),
                             ],
                           ),
+                          // Botão para remover o item da lista
                           IconButton(
                             icon: const Icon(Icons.delete_outline,
                                 color: Colors.red),
                             onPressed: () {
                               setState(() {
-                                scannedProducts.removeAt(index);
+                                scannedProducts.remove(product['id']);
                               });
                             },
                           ),
@@ -213,7 +265,8 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
               padding: const EdgeInsets.all(16.0),
               child: Text(
                 'TOTAL: R\$${calcularTotal().toStringAsFixed(2)}',
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
+                style:
+                    const TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
               ),
             ),
             _buildConfirmButton(),
@@ -224,183 +277,194 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
   }
 
   Widget _buildImportedListView() {
-  // Exibe a lista importada
-  return Center(
-    child: Container(
-      width: 700,
-      height: 300,
-      padding: const EdgeInsets.all(20.0),
-      decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 255, 255, 255),
-         borderRadius: BorderRadius.circular(10),
-         boxShadow: [
-           BoxShadow(
-             color: Colors.grey.withOpacity(0.1),
-             spreadRadius: 5,
-             blurRadius: 10,
-             offset: const Offset(0, 3),
-           ),
-         ]
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: importedList.length,
-              itemBuilder: (context, index) {
-                final product = importedList[index];
-                final scanned = product['quantidadeEscaneada'] ?? 0;
-                final total = product['quantidade'] ?? 0;
-                final preco = product['preco'] ?? 0.0;
-                final isChecked = scanned == total;
+    print('Import List: $importedList');
+    // Exibe a lista importada
+    return Center(
+      child: Container(
+        width: 700,
+        height: 300,
+        padding: const EdgeInsets.all(20.0),
+        decoration: BoxDecoration(
+            color: const Color.fromARGB(255, 255, 255, 255),
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                spreadRadius: 5,
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ]),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: ListView.builder(
+                itemCount: importedList.length,
+                itemBuilder: (context, index) {
+                  final product = importedList.values.elementAt(index);
+                  final scanned = product['quantidadeEscaneada'] ?? 0;
+                  final total = product['quantidade'] ?? 0;
 
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8.0, vertical: 4.0),
-                    child: Stack(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            borderRadius: BorderRadius.circular(10),
-                            border: isChecked
-                                ? Border.all(color: const Color.fromARGB(255, 0, 0, 0), width: 2)
-                                : null,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Checkbox(
-                                    checkColor: const Color.fromARGB(255, 0, 0, 0),
-                                    activeColor: const Color.fromARGB(255, 255, 255, 255),
-                                    value: isChecked,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        if (value == true) {
-                                          // Marca o item e define a quantidade escaneada como o total
-                                          importedList[index]
-                                              ['quantidadeEscaneada'] = total;
-                                        } else {
-                                          // Desmarca o item e redefine a quantidade escaneada para zero
-                                          importedList[index]
-                                              ['quantidadeEscaneada'] = 0;
-                                        }
-                                      });
-                                    },
-                                  ),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        product['nome'] ?? 'Produto desconhecido',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          decoration: isChecked
-                                              ? TextDecoration.lineThrough
-                                              : TextDecoration.none,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  // Preço do produto
-                                  Text(
-                                    'R\$ ${preco.toStringAsFixed(2)}',
-                                    style: TextStyle(
-                                      color: Colors.black54,
-                                      decoration: isChecked
-                                          ? TextDecoration.lineThrough
-                                          : TextDecoration.none,
+                  double preco = 0.0;
+                  if (scanned > 0) {
+                    // Atualiza o preço quando o produto for escaneado
+                    preco = product['preco'] ?? 0.0;
+                  }
+
+                  final isChecked = scanned == total;
+
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0, vertical: 4.0),
+                      child: Stack(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(10),
+                              border: isChecked
+                                  ? Border.all(
+                                      color: const Color.fromARGB(255, 0, 0, 0),
+                                      width: 2)
+                                  : null,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Checkbox(
+                                      checkColor:
+                                          const Color.fromARGB(255, 0, 0, 0),
+                                      activeColor: const Color.fromARGB(
+                                          255, 255, 255, 255),
+                                      value: isChecked,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          if (value == true) {
+                                            // Marca o item e define a quantidade escaneada como o total
+                                            product //se n funcionar substituir por importedList
+                                                ['quantidadeEscaneada'] = total;
+                                          } else {
+                                            // Desmarca o item e redefine a quantidade escaneada para zero
+                                            product['quantidadeEscaneada'] = 0;
+                                          }
+                                        });
+                                      },
                                     ),
-                                  ),
-                                  // Botão para diminuir a quantidade escaneada
-                                  IconButton(
-                                    icon: const Icon(Icons.remove),
-                                    onPressed: () {
-                                      setState(() {
-                                        if (scanned > 0) {
-                                          importedList[index]
-                                                  ['quantidadeEscaneada'] =
-                                              scanned - 1;
-                                        }
-                                      });
-                                    },
-                                  ),
-                                  // Texto com a quantidade escaneada e total
-                                  Text(
-                                    '$scanned/$total',
-                                    style: const TextStyle(color: Colors.black54),
-                                  ),
-                                  // Botão para aumentar a quantidade escaneada
-                                  IconButton(
-                                    icon: const Icon(Icons.add),
-                                    onPressed: () {
-                                      setState(() {
-                                        if (scanned < total) {
-                                          importedList[index]
-                                                  ['quantidadeEscaneada'] =
-                                              scanned + 1;
-                                        }
-                                      });
-                                    },
-                                  ),
-                                  // Botão para remover o item da lista
-                                  IconButton(
-                                    icon: const Icon(Icons.delete_outline,
-                                        color: Colors.red),
-                                    onPressed: () {
-                                      setState(() {
-                                        importedList.removeAt(index);
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        if (isChecked) // Adiciona a linha riscada quando o item for marcado se quiser remover o tirar esse if 
-                          Positioned.fill(
-                            child: Align(
-                              alignment: Alignment.center,
-                              child: Container(
-                                height: 1,
-                                color: Colors.black,
-                              ),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          product['nome'] ??
+                                              'Produto desconhecido',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            decoration: isChecked
+                                                ? TextDecoration.lineThrough
+                                                : TextDecoration.none,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    // Preço do produto
+                                    Text(
+                                      'R\$ ${preco.toStringAsFixed(2)}',
+                                      style: TextStyle(
+                                        color: Colors.black54,
+                                        decoration: isChecked
+                                            ? TextDecoration.lineThrough
+                                            : TextDecoration.none,
+                                      ),
+                                    ),
+                                    // Botão para diminuir a quantidade escaneada
+                                    IconButton(
+                                      icon: const Icon(Icons.remove),
+                                      onPressed: () {
+                                        setState(() {
+                                          if (scanned > 0) {
+                                            importedList[product['nome']]
+                                                    ['quantidadeEscaneada'] =
+                                                scanned - 1;
+                                          }
+                                        });
+                                      },
+                                    ),
+                                    // Texto com a quantidade escaneada e total
+                                    Text(
+                                      '$scanned/$total',
+                                      style: const TextStyle(
+                                          color: Colors.black54),
+                                    ),
+                                    // Botão para aumentar a quantidade escaneada
+                                    IconButton(
+                                      icon: const Icon(Icons.add),
+                                      onPressed: () {
+                                        setState(() {
+                                          if (scanned < total) {
+                                            importedList[product['nome']]
+                                                    ['quantidadeEscaneada'] =
+                                                scanned + 1;
+                                          }
+                                        });
+                                      },
+                                    ),
+                                    // Botão para remover o item da lista
+                                    IconButton(
+                                      icon: const Icon(Icons.delete_outline,
+                                          color: Colors.red),
+                                      onPressed: () {
+                                        setState(() {
+                                          importedList.remove(product['nome']);
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
-                      ],
+                          if (isChecked) // Adiciona a linha riscada quando o item for marcado se quiser remover o tirar esse if
+                            Positioned.fill(
+                              child: Align(
+                                alignment: Alignment.center,
+                                child: Container(
+                                  height: 1,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'TOTAL: R\$${_calculateImportedListTotal().toStringAsFixed(2)}',
-              style:
-                  const TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'TOTAL: R\$${_calculateImportedListTotal().toStringAsFixed(2)}',
+                style:
+                    const TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
+              ),
             ),
-          ),
-          _buildConfirmButton(),
-        ],
+            _buildConfirmButton(),
+          ],
+        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   double _calculateImportedListTotal() {
-    return importedList.fold(0.0, (total, product) {
+    return importedList.values.fold(0.0, (total, product) {
       final preco = product['preco'] ?? 0.0;
       final scanned = product['quantidadeEscaneada'] ?? 0;
       return total + (preco * scanned);
@@ -414,7 +478,8 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
         if (scannedProducts.isEmpty && importedList.isEmpty) {
           _showAlertDialog(context);
         } else {
-          Navigator.push(
+          _cameraSetup.dispose();
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => TelaQrCode(

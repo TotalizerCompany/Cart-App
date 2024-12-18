@@ -8,7 +8,6 @@ class TelaBoasVindas extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -16,16 +15,17 @@ class TelaBoasVindas extends StatelessWidget {
             // Adicionando a imagem aqui
             CircleAvatar(
               radius: 80, // Tamanho da imagem
-              backgroundImage: AssetImage('assets/icon/icon1.png'), // Caminho para a imagem
+              backgroundImage:
+                  AssetImage('assets/icon/icon1.png'), // Caminho para a imagem
               backgroundColor: Colors.transparent,
             ),
-           const Text(
-                        'TOTALIZER',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
+            const Text(
+              'TOTALIZER',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
             Text(
               'Seja bem vindo!',
               style: TextStyle(

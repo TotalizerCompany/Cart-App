@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:totalizer_cart/views/tela_principal.dart'; 
+import 'package:totalizer_cart/views/tela_principal.dart';
 
 class ListaDetalhadaScreen extends StatelessWidget {
   final String listaId;
@@ -17,7 +17,7 @@ class ListaDetalhadaScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Detalhes da Lista: $listaId'),
+        title: Text(listaId),
         centerTitle: false,
         titleTextStyle: const TextStyle(
           fontSize: 20,
@@ -43,12 +43,20 @@ class ListaDetalhadaScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: Colors.black,
         onPressed: () {
+          print('lista importada: $itensList');
+
+          var itensMap =
+              itensList.asMap().map((index, item) => MapEntry<String, dynamic>(
+                    item['nome'],
+                    item,
+                  ));
+
           // Chama a TelaPrincipal e passa a lista de itens
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => TelaPrincipal(
-                listaImportada: List<Map<String, dynamic>>.from(itensList),
+                listaImportada: itensMap,
               ),
             ),
           );

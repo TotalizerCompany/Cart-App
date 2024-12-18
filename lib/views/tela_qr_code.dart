@@ -6,7 +6,7 @@ import 'package:archive/archive.dart';
 import 'package:totalizer_cart/views/boas_vindas.dart';
 
 class TelaQrCode extends StatefulWidget {
-  final List<dynamic> minhalista;
+  final Map<String, dynamic> minhalista;
 
   const TelaQrCode({super.key, required this.minhalista});
 
@@ -44,6 +44,7 @@ class _TelaQrCodeState extends State<TelaQrCode> {
 
   @override
   Widget build(BuildContext context) {
+    print('Conteúdo de minhalista: ${widget.minhalista}');
     return Scaffold(
       appBar: AppBar(
         title: const Text('TOTALIZER'),
@@ -94,7 +95,7 @@ class _TelaQrCodeState extends State<TelaQrCode> {
                     context,
                     MaterialPageRoute(
                         builder: (context) =>
-                            TelaBoasVindas()), // Substitua TelaInicial pela sua tela inicial
+                            TelaBoasVindas()),
                   );
                 },
                 child: const Text('Voltar para a Tela Inicial',
@@ -111,9 +112,9 @@ class _TelaQrCodeState extends State<TelaQrCode> {
   }
 
   //Função para compactar a lista em gZip
-  Future<String> compactarLista(List<dynamic> lista) async {
+  Future<String> compactarLista(Map<String, dynamic> mapa) async {
     //converte a lista em string (formato JSON)
-    String dadosString = jsonEncode(lista);
+    String dadosString = jsonEncode(mapa);
     //converte a string em bytes (formato UTF-8)
     List<int> dadosBytes = utf8.encode(dadosString);
     //compacta os os bytes com o GZip
