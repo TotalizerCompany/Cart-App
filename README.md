@@ -82,4 +82,4 @@ Este projeto está licenciado sob a [licença MIT](LICENSE).
 
 ## Contato
 
-Para mais informações, entre em contato com a equipe de desenvolvimento através do repositório do GitHub ou pelo email: **contato@totalizercompany.com**.
+Para mais informações, entre em contato com a equipe de desenvolvimento através do repositório do GitHub ou pelo email: **TotalizerCompany@gmail.com**.
